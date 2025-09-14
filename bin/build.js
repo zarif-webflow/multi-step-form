@@ -52,6 +52,7 @@ else {
     .serve({
       servedir: BUILD_DIRECTORY,
       port: SERVE_PORT,
+      cors: { origin: "*" },
     })
     .then(logServedFiles);
 }
