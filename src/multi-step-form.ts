@@ -1,5 +1,46 @@
 import { getGsap, getMultipleHtmlElements } from "@taj-wf/utils";
 
+const inputSelector = [
+  'input[type="text"]',
+  'input[type="email"]',
+  'input[type="password"]',
+  'input[type="number"]',
+  'input[type="tel"]',
+  'input[type="url"]',
+  'input[type="date"]',
+  'input[type="datetime-local"]',
+  'input[type="time"]',
+  'input[type="month"]',
+  'input[type="week"]',
+  'input[type="search"]',
+  'input[type="color"]',
+  'input[type="range"]',
+  'input[type="file"]',
+  'input[type="hidden"]',
+  'input[type="checkbox"]',
+  'input[type="radio"]',
+  'input[type="submit"]',
+  'input[type="button"]',
+  'input[type="reset"]',
+  "input:not([type])", // Default input without type attribute
+  "select",
+  "textarea",
+].join(", ");
+
+const getAllInputElements = (parentElement: HTMLElement) => {
+  // Comprehensive CSS selector for all input elements
+
+  const allInputs = getMultipleHtmlElements<
+    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  >({
+    selector: inputSelector,
+    parent: parentElement,
+    log: "error",
+  });
+
+  return allInputs || [];
+};
+
 const initMultiStepForm = () => {
   const [gsap] = getGsap();
 
@@ -51,6 +92,16 @@ const initMultiStepForm = () => {
       const currentStepElement = steps[currentStep];
       const nextStepElement = steps[currentStep + 1];
 
+      //   Input Validation Start
+      const currentStepInputs = getAllInputElements(currentStepElement);
+
+      for (const inputEl of currentStepInputs) {
+        if (inputEl.checkValidity()) continue;
+        inputEl.reportValidity();
+        return;
+      }
+
+      // Animation Start
       await gsap.to(currentStepElement, { xPercent: -102, opacity: 0, duration: 0.4 }).then();
 
       currentStepElement.classList.add("is--hidden");
@@ -60,6 +111,7 @@ const initMultiStepForm = () => {
       nextStepElement.classList.remove("is--hidden");
 
       await gsap.to(nextStepElement, { xPercent: 0, opacity: 1, duration: 0.4 });
+      //   Animation End
 
       currentStep += 1;
     };
@@ -70,6 +122,7 @@ const initMultiStepForm = () => {
       const currentStepElement = steps[currentStep];
       const prevStepElement = steps[currentStep - 1];
 
+      //   Animation Start
       await gsap.to(currentStepElement, { xPercent: 102, opacity: 0, duration: 0.4 }).then();
 
       currentStepElement.classList.add("is--hidden");
@@ -79,6 +132,7 @@ const initMultiStepForm = () => {
       prevStepElement.classList.remove("is--hidden");
 
       await gsap.to(prevStepElement, { xPercent: 0, opacity: 1, duration: 0.4 });
+      //   Animation End
 
       currentStep -= 1;
     };
